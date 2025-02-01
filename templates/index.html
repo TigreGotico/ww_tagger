@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wake Word Tagger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h3 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .audio-player {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 20px;
+        }
+        form label {
+            font-weight: bold;
+        }
+        form select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Wake Word Tagger</h1>
+
+        <h3>Folder: {{ folder }}</h3>
+        {% if audio_files %}
+            <h3>Sample {{ current_index + 1 }} out of {{ audio_files|length }}</h3>
+            <div class="audio-player">
+                <h3>Current Audio File: {{ current_audio }}</h3>
+                <audio controls>
+                    <source src="{{ url_for('audio', filename=current_audio) }}" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <form method="post">
+                <div>
+                    <label for="tag">Classification:</label>
+                    <select name="tag">
+                        <option {% if metadata.get('tag', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
+                        <option {% if metadata.get('tag', 'unknown') == 'ww' %}selected{% endif %} value="ww">WakeWord</option>
+                        <option {% if metadata.get('tag', 'unknown') == 'not-ww' %}selected{% endif %} value="not-ww">NOT WakeWord</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="gender">Speaker Gender:</label>
+                    <select name="gender">
+                        <option {% if metadata.get('genre', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
+                        <option {% if metadata.get('genre', 'unknown') == 'male' %}selected{% endif %} value="male">Male</option>
+                        <option {% if metadata.get('genre', 'unknown') == 'female' %}selected{% endif %} value="female">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="silence_type">Silence Type:</label>
+                    <select name="silence_type">
+                        <option {% if metadata.get('silence_type', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
+                       <option {% if metadata.get('silence_type', 'unknown') == 'music-or-tv' %}selected{% endif %} value="music-or-tv">Music or TV</option>
+                        <option {% if metadata.get('silence_type', 'unknown') == 'noise' %}selected{% endif %} value="noise">Noise</option>
+                        <option {% if metadata.get('silence_type', 'unknown') == 'human-non-speech' %}selected{% endif %} value="human-non-speech">Human Non-Speech</option>
+                        <option {% if metadata.get('silence_type', 'unknown') == 'silence' %}selected{% endif %} value="silence">Silence</option>
+                    </select>
+                    <br><br>
+                </div>
+
+            <!-- Navigation Buttons -->
+            <button type="submit" name="prev">Previous</button>
+            <button type="submit">Submit Tag</button>
+            <button type="submit" name="next">Next</button>
+        </form>
+
+    {% else %}
+        <p>No files loaded. Please load a folder with .wav files.</p>
+    {% endif %}
+
+</body>
+</html>
