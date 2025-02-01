@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wake Word Tagger</title>
+    <title>OVOS Wake Word Tagger</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,6 +14,18 @@
         h1, h3 {
             text-align: center;
             color: #333;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        h1 img {
+            width: 40px; /* Adjust size of the logo */
+            height: auto;
         }
         .container {
             max-width: 800px;
@@ -87,19 +99,29 @@
             color: #d63384;
             font-size: 16px;
         }
-
+        .logo-container {
+            text-align: center; /* Centers the logo horizontally */
+            margin-bottom: 20px; /* Adds space below the logo */
+        }
+        .logo {
+            width: 150px; /* Set logo width */
+            height: auto; /* Maintain aspect ratio */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Wake Word Tagger</h1>
-
+        <p class="logo-container">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="OVOS Logo" class="logo">
+        </p>
+        <h1>
+            Wake Word Tagger
+        </h1>
 
         {% if audio_files %}
             <h3>Sample {{ current_index + 1 }} out of {{ audio_files|length }}</h3>
-                <p><code class="json-path">{{ current_audio }}</code></p>
+            <p><code class="json-path">{{ current_audio }}</code></p>
             <div class="audio-player">
-
                 <audio controls>
                     <source src="{{ url_for('audio', filename=current_audio) }}" type="audio/wav">
                     Your browser does not support the audio element.
