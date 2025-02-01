@@ -8,13 +8,24 @@ def get_app(folder_path: str, db: JsonStorage):
     app = Flask(__name__)
 
     current_index = db.get("_current_index", 0)
-
-    audio_files = [f for f in os.listdir(folder_path) if f.endswith('.wav')]
-    audio_files.sort()  # To ensure consistent order
+    if os.path.isdir(folder_path):
+        audio_files = [f for f in os.listdir(folder_path) if f.endswith('.wav')]
+        audio_files.sort()  # To ensure consistent order
+    else:
+        audio_files = []
 
     @app.route("/", methods=["GET", "POST"])
     def index():
         nonlocal current_index, folder_path, audio_files, db
+
+        if not len(audio_files):
+            return render_template("index.html",
+                                   audio_files=audio_files,
+                                   current_audio="",
+                                   folder=folder_path,
+                                   json_path=db.path,
+                                   metadata={"tag": "unknown", "gender": "unknown", "silence_type": "unknown"},
+                                   current_index=0)
 
         file_name = audio_files[current_index]
 
@@ -57,10 +68,11 @@ def get_app(folder_path: str, db: JsonStorage):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Wake Word Tagger')
-    parser.add_argument('--folder', type=str, required=True, help='Path to the folder with .wav files')
+    parser.add_argument('--folder', type=str, required=False, help='Path to the folder with .wav files')
     parser.add_argument('--db', type=str, required=False, help='Path to the JSON database file to store tags')
     args = parser.parse_args()
-    db_path = args.db or os.path.join(args.folder, "tags.json")
+    folder = args.folder or os.path.expanduser("~/.local/share/mycroft/listener/wake_words")
+    db_path = args.db or os.path.join(folder, "tags.json")
     db = JsonStorage(db_path)
-    app = get_app(args.folder, db)
+    app = get_app(folder, db)
     app.run(debug=True)

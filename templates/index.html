@@ -29,29 +29,65 @@
         }
         form {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr;
             grid-gap: 20px;
+            margin-top: 20px;
         }
         form label {
             font-weight: bold;
+            margin-bottom: 5px;
         }
         form select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
         form button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
-        form button:hover {
+        /* Submit button style */
+        form button[type="submit"]:not([name="prev"]):not([name="next"]) {
+            background-color: #4CAF50;
+            color: white;
+        }
+        form button[type="submit"]:not([name="prev"]):not([name="next"]):hover {
             background-color: #45a049;
         }
+        /* Navigation buttons style */
+        form button[type="submit"][name="prev"],
+        form button[type="submit"][name="next"] {
+            background-color: #007bff;
+            color: white;
+        }
+        form button[type="submit"][name="prev"]:hover,
+        form button[type="submit"][name="next"]:hover {
+            background-color: #0056b3;
+        }
+
+        code.json-path {
+            background-color: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: Consolas, "Courier New", monospace;
+            color: #007bff;
+            font-size: 16px;
+            display: inline-block;
+        }
+        code.bash {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            display: block;
+            font-family: Consolas, "Courier New", monospace;
+            color: #d63384;
+            font-size: 16px;
+        }
+
     </style>
 </head>
 <body>
@@ -90,23 +126,32 @@
                     <label for="silence_type">Silence Type:</label>
                     <select name="silence_type">
                         <option {% if metadata.get('silence_type', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
-                       <option {% if metadata.get('silence_type', 'unknown') == 'music-or-tv' %}selected{% endif %} value="music-or-tv">Music or TV</option>
+                        <option {% if metadata.get('silence_type', 'unknown') == 'music-or-tv' %}selected{% endif %} value="music-or-tv">Music or TV</option>
                         <option {% if metadata.get('silence_type', 'unknown') == 'noise' %}selected{% endif %} value="noise">Noise</option>
                         <option {% if metadata.get('silence_type', 'unknown') == 'human-non-speech' %}selected{% endif %} value="human-non-speech">Human Non-Speech</option>
                         <option {% if metadata.get('silence_type', 'unknown') == 'silence' %}selected{% endif %} value="silence">Silence</option>
                     </select>
-                    <br><br>
                 </div>
 
-            <!-- Navigation Buttons -->
-            <button type="submit" name="prev">Previous</button>
-            <button type="submit">Submit Tag</button>
-            <button type="submit" name="next">Next</button>
-        </form>
+                <!-- Navigation Buttons -->
+                <div style="display: flex; justify-content: space-between;">
+                    <button type="submit" name="prev">Previous</button>
+                    <button type="submit">Submit Tag</button>
+                    <button type="submit" name="next">Next</button>
+                </div>
+            </form>
 
-    {% else %}
-        <p>No files loaded. Please load a folder with .wav files.</p>
-    {% endif %}
+        {% else %}
+        <br>
+        <p>No audio recordings found!</p>
+        <br>
+        <p>Need help collecting a dataset?<br>You can enable wake word collection in <strong>ovos-listener</strong> by running the following command in your terminal:</p>
+        <pre><code class="bash">ovos-config set --key listener/record_wake_words</code></pre>
+        <p>Once enabled, the system will start recording wake word samples for further tagging.</p>
+        <p>Tagged metadata can be used in downstream tasks such as wake word training. </p>
+        <p>Metadata is saved in json format at <code class="json-path">{{ json_path }}</code></p>
 
+        {% endif %}
+    </div>
 </body>
 </html>
