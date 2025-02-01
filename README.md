@@ -1,6 +1,6 @@
 # Wake Word Tagger
 
-![img.png](img.png)
+![img_1.png](img_1.png)
 
 The Wake Word Tagger is a web application that allows you to tag and classify audio samples as "Wake Word", "NOT Wake Word", or other categories. 
 
@@ -17,27 +17,21 @@ It also allows you to specify the speaker's gender and the type of silence in th
 
 ## Usage
 
-1. Clone the repository:
+```bash
+git clone https://github.com/your-username/wake-word-tagger
 
-   ```
-   git clone https://github.com/your-username/wake-word-tagger.git
-   ```
+cd wake-word-tagger
 
-2. Install the required dependencies:
+pip install -r requirements.txt
 
-   ```
-   pip install -r requirements.txt
-   ```
+python app.py --folder /path/to/audio/files --db /path/to/tags.json
+```
 
-3. Run the application:
+Replace `/path/to/audio/files` with the actual path to the folder containing the `.wav` files, and `tags.json` with the JSON database file. 
 
-   ```
-   python app.py --folder /path/to/audio/files --db /path/to/tags.json
-   ```
+If not specified will default to `~/.local/share/mycroft/listener/wake_words` (default save path for **ovos-listener**)
 
-   Replace `/path/to/audio/files` with the actual path to the folder containing the `.wav` files, and `tags.json` with the JSON database file.
-
-4. Open your web browser and navigate to `http://localhost:5000` to access the Wake Word Tagger interface.
+Open your web browser and navigate to `http://localhost:5000` to access the Wake Word Tagger interface.
 
 ## Contributing
 

@@ -1,13 +1,13 @@
 {
     "326137860.11.wav": {
         "tag": "ww",
-        "silence_type": "unknown",
+        "noise_type": "unknown",
         "gender": "unknown"
     },
     "_current_index": 4,
     "326137860.12.wav": {
         "tag": "ww",
-        "silence_type": "unknown",
+        "noise_type": "unknown",
         "gender": "unknown"
     }
 }

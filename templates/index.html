@@ -94,15 +94,18 @@
     <div class="container">
         <h1>Wake Word Tagger</h1>
 
-        <h3>Folder: {{ folder }}</h3>
+
         {% if audio_files %}
             <h3>Sample {{ current_index + 1 }} out of {{ audio_files|length }}</h3>
+                <p><code class="json-path">{{ current_audio }}</code></p>
             <div class="audio-player">
-                <h3>Current Audio File: {{ current_audio }}</h3>
+
                 <audio controls>
                     <source src="{{ url_for('audio', filename=current_audio) }}" type="audio/wav">
                     Your browser does not support the audio element.
                 </audio>
+
+                <h3>Wake Word: <code class="json-path">{{ wake_word }}</code></h3>
             </div>
 
             <form method="post">
@@ -123,13 +126,14 @@
                     </select>
                 </div>
                 <div>
-                    <label for="silence_type">Silence Type:</label>
-                    <select name="silence_type">
-                        <option {% if metadata.get('silence_type', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
-                        <option {% if metadata.get('silence_type', 'unknown') == 'music-or-tv' %}selected{% endif %} value="music-or-tv">Music or TV</option>
-                        <option {% if metadata.get('silence_type', 'unknown') == 'noise' %}selected{% endif %} value="noise">Noise</option>
-                        <option {% if metadata.get('silence_type', 'unknown') == 'human-non-speech' %}selected{% endif %} value="human-non-speech">Human Non-Speech</option>
-                        <option {% if metadata.get('silence_type', 'unknown') == 'silence' %}selected{% endif %} value="silence">Silence</option>
+                    <label for="noise_type">Noise Type:</label>
+                    <select name="noise_type">
+                        <option {% if metadata.get('noise_type', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
+                        <option {% if metadata.get('noise_type', 'unknown') == 'tts' %}selected{% endif %} value="tts">TTS (text-to-speech)</option>
+                        <option {% if metadata.get('noise_type', 'unknown') == 'music-or-tv' %}selected{% endif %} value="music-or-tv">Music or TV</option>
+                        <option {% if metadata.get('noise_type', 'unknown') == 'noise' %}selected{% endif %} value="noise">Noise</option>
+                        <option {% if metadata.get('noise_type', 'unknown') == 'human-non-speech' %}selected{% endif %} value="human-non-speech">Human Non-Speech</option>
+                        <option {% if metadata.get('noise_type', 'unknown') == 'silence' %}selected{% endif %} value="silence">Silence</option>
                     </select>
                 </div>
 
@@ -141,15 +145,18 @@
                 </div>
             </form>
 
+            <h4>Folder: <code class="json-path">{{ folder }}</code></h4>
+            <h4>Metadata: <code class="json-path">{{ json_path }}</code></h4>
+
         {% else %}
-        <br>
-        <p>No audio recordings found!</p>
-        <br>
-        <p>Need help collecting a dataset?<br>You can enable wake word collection in <strong>ovos-listener</strong> by running the following command in your terminal:</p>
-        <pre><code class="bash">ovos-config set --key listener/record_wake_words</code></pre>
-        <p>Once enabled, the system will start recording wake word samples for further tagging.</p>
-        <p>Tagged metadata can be used in downstream tasks such as wake word training. </p>
-        <p>Metadata is saved in json format at <code class="json-path">{{ json_path }}</code></p>
+            <br>
+            <p>No audio recordings found!</p>
+            <br>
+            <p>Need help collecting a dataset?<br>You can enable wake word collection in <strong>ovos-listener</strong> by running the following command in your terminal:</p>
+            <pre><code class="bash">ovos-config set --key listener/record_wake_words</code></pre>
+            <p>Once enabled, the system will start recording wake word samples for further tagging.</p>
+            <p>Tagged metadata can be used in downstream tasks such as wake word training. </p>
+            <p>Metadata is saved in json format at <code class="json-path">{{ json_path }}</code></p>
 
         {% endif %}
     </div>

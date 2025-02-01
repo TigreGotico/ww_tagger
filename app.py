@@ -1,3 +1,4 @@
+import json
 import os
 import argparse
 from flask import Flask, render_template, request, send_from_directory
@@ -10,10 +11,13 @@ def get_app(folder_path: str, db: JsonStorage):
     current_index = db.get("_current_index", 0)
     if os.path.isdir(folder_path):
         audio_files = [f for f in os.listdir(folder_path) if f.endswith('.wav')]
+        metadatas = {f: f.replace(".wav", ".json") for f in audio_files}
         audio_files.sort()  # To ensure consistent order
     else:
         audio_files = []
+        metadatas = {}
 
+    print(metadatas)
     @app.route("/", methods=["GET", "POST"])
     def index():
         nonlocal current_index, folder_path, audio_files, db
@@ -24,10 +28,16 @@ def get_app(folder_path: str, db: JsonStorage):
                                    current_audio="",
                                    folder=folder_path,
                                    json_path=db.path,
-                                   metadata={"tag": "unknown", "gender": "unknown", "silence_type": "unknown"},
+                                   metadata={"tag": "unknown", "gender": "unknown", "noise_type": "unknown"},
                                    current_index=0)
 
+        ww = ""
         file_name = audio_files[current_index]
+        meta = os.path.join(folder_path, metadatas[file_name])
+        if os.path.isfile(meta):
+            with open(meta) as fi:
+                meta = json.load(fi)
+            ww = meta.get("name")
 
         if request.method == "POST":
             if 'prev' in request.form:
@@ -38,9 +48,9 @@ def get_app(folder_path: str, db: JsonStorage):
                 file_name = audio_files[current_index]
             else:
                 db[file_name] = {'tag': request.form.get('tag', 'unknown'),
-                                 'silence_type': request.form.get('silence_type', 'unknown'),
-                                 'gender': request.form.get('gender', 'unknown')}
-                print(db[file_name])
+                                 'noise_type': request.form.get('noise_type', 'unknown'),
+                                 'gender': request.form.get('gender', 'unknown'),
+                                 "wake_word": ww}
                 db["_current_index"] = current_index
                 db.store()
 
@@ -52,10 +62,12 @@ def get_app(folder_path: str, db: JsonStorage):
 
         return render_template("index.html",
                                audio_files=audio_files,
+                               wake_word=ww,
                                current_audio=current_audio,
                                folder=folder_path,
+                                   json_path=db.path,
                                metadata=db.get(file_name,
-                                               {"tag": "unknown", "gender": "unknown", "silence_type": "unknown"}),
+                                               {"tag": "unknown", "gender": "unknown", "noise_type": "unknown"}),
                                current_index=current_index)
 
     @app.route('/audio/<filename>')
