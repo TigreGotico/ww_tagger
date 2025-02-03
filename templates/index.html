@@ -110,77 +110,157 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <p class="logo-container">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="OVOS Logo" class="logo">
-        </p>
-        <h1>
-            Wake Word Tagger
-        </h1>
+<div class="container">
 
-        {% if audio_files %}
-            <h3>Sample {{ current_index + 1 }} out of {{ audio_files|length }}</h3>
-            <p><code class="json-path">{{ current_audio }}</code></p>
-            <div class="audio-player">
-                <audio controls>
-                    <source src="{{ url_for('audio', filename=current_audio) }}" type="audio/wav">
-                    Your browser does not support the audio element.
-                </audio>
 
-                <h3>Wake Word: <code class="json-path">{{ wake_word }}</code></h3>
-            </div>
+    <!-- Logo and Title -->
+    <p class="logo-container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="OVOS Logo" class="logo">
+    </p>
+    <h1>Wake Word Tagger</h1>
 
+    {% if audio_files %}
+    <h3>Sample {{ current_index + 1 }} out of {{ audio_files|length }}</h3>
+
+    <p><code class="json-path">{{ current_audio }}</code></p>
+    <div class="audio-player">
+        <audio controls>
+            <source src="{{ url_for('audio', filename=current_audio) }}" type="audio/wav">
+            Your browser does not support the audio element.
+        </audio>
+
+        <h3>Wake Word: <code class="json-path">{{ wake_word }}</code></h3>
+    </div>
+
+    <form method="post">
+        <div>
+            <label for="tag">Classification:</label>
+            <select name="tag">
+                <option {% if metadata.get(
+                'tag', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
+                <option {% if metadata.get(
+                'tag', 'unknown') == 'ww' %}selected{% endif %} value="ww">WakeWord</option>
+                <option {% if metadata.get(
+                'tag', 'unknown') == 'not-ww' %}selected{% endif %} value="not-ww">NOT WakeWord</option>
+            </select>
+        </div>
+        <div>
+            <label for="gender">Speaker Gender:</label>
+            <select name="gender">
+                <option {% if metadata.get(
+                'genre', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
+                <option {% if metadata.get(
+                'genre', 'unknown') == 'male' %}selected{% endif %} value="male">Male</option>
+                <option {% if metadata.get(
+                'genre', 'unknown') == 'female' %}selected{% endif %} value="female">Female</option>
+            </select>
+        </div>
+        <div>
+            <label for="noise_type">Noise Type:</label>
+            <select name="noise_type">
+                <option {% if metadata.get(
+                'noise_type', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
+                <option {% if metadata.get(
+                'noise_type', 'unknown') == 'tts' %}selected{% endif %} value="tts">TTS (text-to-speech)</option>
+                <option {% if metadata.get(
+                'noise_type', 'unknown') == 'music-or-tv' %}selected{% endif %} value="music-or-tv">Music or TV</option>
+                <option {% if metadata.get(
+                'noise_type', 'unknown') == 'noise' %}selected{% endif %} value="noise">Noise</option>
+                <option {% if metadata.get(
+                'noise_type', 'unknown') == 'human-non-speech' %}selected{% endif %} value="human-non-speech">Human
+                Non-Speech</option>
+                <option {% if metadata.get(
+                'noise_type', 'unknown') == 'silence' %}selected{% endif %} value="silence">Silence</option>
+            </select>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div style="display: flex; justify-content: space-between;">
+            <button type="submit" name="prev">Previous</button>
+            <button type="submit">Submit Tag</button>
+            <button type="submit" name="next">Next</button>
+        </div>
+
+
+    </form>
+
+    <h4>Folder: <code class="json-path">{{ folder }}</code></h4>
+    <h4>Metadata: <code class="json-path">{{ json_path }}</code></h4>
+
+
+    {% else %}
+    {% if tagged_files %}
+    <br>
+    <p>All audio recordings tagged!</p>
+    <br>
+    <p>Need help collecting more?<br>You can enable wake word collection in <strong>ovos-listener</strong> by running
+        the following command in your terminal:</p>
+    <pre><code class="bash">ovos-config set --key listener/record_wake_words</code></pre>
+    <p>Once enabled, the system will start recording wake word samples for further tagging.</p>
+    <p>Tagged metadata can be used in downstream tasks such as wake word training. </p>
+    <p>Metadata is saved in json format at <code class="json-path">{{ json_path }}</code></p>
+    {% else %}
+    <br>
+    <p>No audio recordings found!</p>
+    <br>
+    <p>Need help collecting a dataset?<br>You can enable wake word collection in <strong>ovos-listener</strong> by
+        running the following command in your terminal:</p>
+    <pre><code class="bash">ovos-config set --key listener/record_wake_words</code></pre>
+    <p>Once enabled, the system will start recording wake word samples for further tagging.</p>
+    <p>Tagged metadata can be used in downstream tasks such as wake word training. </p>
+    <p>Metadata is saved in json format at <code class="json-path">{{ json_path }}</code></p>
+    {% endif %}
+
+    {% endif %}
+
+        <!-- Config Section (Collapsible) -->
+    <div class="config-section">
+        <button class="config-toggle" onclick="toggleConfig()">Click to Expand Config</button>
+        <div class="config-options" style="display:none;">
             <form method="post">
                 <div>
-                    <label for="tag">Classification:</label>
-                    <select name="tag">
-                        <option {% if metadata.get('tag', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
-                        <option {% if metadata.get('tag', 'unknown') == 'ww' %}selected{% endif %} value="ww">WakeWord</option>
-                        <option {% if metadata.get('tag', 'unknown') == 'not-ww' %}selected{% endif %} value="not-ww">NOT WakeWord</option>
-                    </select>
+                    <input type="checkbox" id="show-tagged-samples" name="show_tagged_samples"
+                           {% if show_tagged_samples %}checked{% endif %}>
+                    <label for="show-tagged-samples">Show Already Tagged Samples</label>
                 </div>
                 <div>
-                    <label for="gender">Speaker Gender:</label>
-                    <select name="gender">
-                        <option {% if metadata.get('genre', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
-                        <option {% if metadata.get('genre', 'unknown') == 'male' %}selected{% endif %} value="male">Male</option>
-                        <option {% if metadata.get('genre', 'unknown') == 'female' %}selected{% endif %} value="female">Female</option>
-                    </select>
+                    <input type="checkbox" id="show-untagged-samples" name="show_untagged_samples"
+                           {% if show_untagged_samples %}checked{% endif %}>
+                    <label for="show-untagged-samples">Show Untagged Samples</label>
                 </div>
                 <div>
-                    <label for="noise_type">Noise Type:</label>
-                    <select name="noise_type">
-                        <option {% if metadata.get('noise_type', 'unknown') == 'unknown' %}selected{% endif %} value="unknown">Unknown</option>
-                        <option {% if metadata.get('noise_type', 'unknown') == 'tts' %}selected{% endif %} value="tts">TTS (text-to-speech)</option>
-                        <option {% if metadata.get('noise_type', 'unknown') == 'music-or-tv' %}selected{% endif %} value="music-or-tv">Music or TV</option>
-                        <option {% if metadata.get('noise_type', 'unknown') == 'noise' %}selected{% endif %} value="noise">Noise</option>
-                        <option {% if metadata.get('noise_type', 'unknown') == 'human-non-speech' %}selected{% endif %} value="human-non-speech">Human Non-Speech</option>
-                        <option {% if metadata.get('noise_type', 'unknown') == 'silence' %}selected{% endif %} value="silence">Silence</option>
-                    </select>
+                    <input type="checkbox" id="refresh-samples" name="refresh_samples"
+                           {% if refresh_samples %}checked{% endif %}>
+                    <label for="refresh-samples">Refresh Samples List</label>
                 </div>
-
-                <!-- Navigation Buttons -->
-                <div style="display: flex; justify-content: space-between;">
-                    <button type="submit" name="prev">Previous</button>
-                    <button type="submit">Submit Tag</button>
-                    <button type="submit" name="next">Next</button>
+                <!-- Integer input for skipping to a specific sample -->
+                {% if audio_files %}
+                <div>
+                    <label for="skip-sample">Start at Sample Number:</label>
+                    <input type="number" id="skip-sample" name="skip_sample" min="1"
+                           max="{{ audio_files|length }}" value="{{ current_index + 1 }}">
                 </div>
+                {% endif %}
+                <!-- Apply Button -->
+                <button type="submit" name="apply_config">Apply Changes</button>
             </form>
-
-            <h4>Folder: <code class="json-path">{{ folder }}</code></h4>
-            <h4>Metadata: <code class="json-path">{{ json_path }}</code></h4>
-
-        {% else %}
-            <br>
-            <p>No audio recordings found!</p>
-            <br>
-            <p>Need help collecting a dataset?<br>You can enable wake word collection in <strong>ovos-listener</strong> by running the following command in your terminal:</p>
-            <pre><code class="bash">ovos-config set --key listener/record_wake_words</code></pre>
-            <p>Once enabled, the system will start recording wake word samples for further tagging.</p>
-            <p>Tagged metadata can be used in downstream tasks such as wake word training. </p>
-            <p>Metadata is saved in json format at <code class="json-path">{{ json_path }}</code></p>
-
-        {% endif %}
+        </div>
     </div>
+
+</div>
+<!-- Script to toggle the visibility of the config options -->
+<script>
+    function toggleConfig() {
+        var configSection = document.querySelector('.config-options');
+        var configButton = document.querySelector('.config-toggle');
+        if (configSection.style.display === "none") {
+            configSection.style.display = "block";
+            configButton.textContent = "Click to Collapse Config";
+        } else {
+            configSection.style.display = "none";
+            configButton.textContent = "Click to Expand Config";
+        }
+    }
+</script>
 </body>
 </html>
